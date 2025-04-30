@@ -28,13 +28,13 @@ export default function LogsPage() {
           `${process.env.NEXT_PUBLIC_BASE_URL_API}/api/borrow/logs`,
           {
             headers: {
-              "Authorization": `Bearer ${token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        
+
         const data = await res.json();
         setRawData(data);
       } catch (err) {
@@ -66,31 +66,21 @@ export default function LogsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const renderData = (data) => {
-    if (data === null || data === undefined) return "No data";
-    
-    if (Array.isArray(data)) {
-      return (
-        <div className="space-y-4">
-          {data.map((item, index) => (
-            <pre key={index} className="p-4 bg-gray-50 rounded-md overflow-x-auto">
-              {JSON.stringify(item, null, 2)}
-            </pre>
-          ))}
-        </div>
-      );
-    }
-
-    if (typeof data === "object") {
-      return (
-        <pre className="p-4 bg-gray-50 rounded-md overflow-x-auto">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      );
-    }
-
-    return <div>{String(data)}</div>;
-  };
+  const renderLogCard = (log, index) => (
+    <Card key={index} className="mb-4 shadow-sm border border-gray-200">
+      <CardHeader>
+        <CardTitle>Log #{index + 1}</CardTitle>
+      </CardHeader>
+      <CardContent className="text-sm text-gray-700 space-y-1">
+        {Object.entries(log).map(([key, value]) => (
+          <div key={key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <span className="font-medium text-gray-600">{key}:</span>
+            <span className="text-gray-800 break-words sm:ml-2">{String(value)}</span>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="container mx-auto py-8">
@@ -102,8 +92,8 @@ export default function LogsPage() {
         >
           <ChevronLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button 
-          onClick={handleDownload} 
+        <Button
+          onClick={handleDownload}
           className="flex items-center"
           disabled={!rawData}
         >
@@ -111,20 +101,20 @@ export default function LogsPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>System Logs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            renderData(rawData)
-          )}
-        </CardContent>
-      </Card>
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : rawData && Array.isArray(rawData) && rawData.length > 0 ? (
+        rawData.map((log, index) => renderLogCard(log, index))
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>No Logs Found</CardTitle>
+          </CardHeader>
+          <CardContent className="text-gray-500">There are currently no log records to display.</CardContent>
+        </Card>
+      )}
     </div>
   );
 }
