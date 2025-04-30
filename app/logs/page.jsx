@@ -71,24 +71,57 @@ export default function LogsPage() {
     const { user, action, timestamp, status, ...rest } = log;
 
     return (
-      <Card key={index} className="shadow-sm border-gray-200">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base font-semibold text-gray-800">
+      <Card key={index} className="border border-gray-200 shadow-sm p-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold text-gray-800">
             Log #{index + 1}
           </CardTitle>
           <p className="text-sm text-gray-500">
             {timestamp ? new Date(timestamp).toLocaleString() : "No timestamp"}
           </p>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-gray-700">
-          {user && <p><strong>User:</strong> {user}</p>}
-          {action && <p><strong>Action:</strong> {action}</p>}
-          {status && <p><strong>Status:</strong> {status}</p>}
 
-          {/* Show other fields if any */}
+        <CardContent className="text-sm space-y-2">
+          {user && (
+            <div>
+              <span className="font-medium text-gray-700">User:</span>{" "}
+              <span className="text-gray-900">{user}</span>
+            </div>
+          )}
+          {action && (
+            <div>
+              <span className="font-medium text-gray-700">Action:</span>{" "}
+              <span className="text-gray-900">{action}</span>
+            </div>
+          )}
+          {status && (
+            <div>
+              <span className="font-medium text-gray-700">Status:</span>{" "}
+              <span
+                className={`font-semibold ${
+                  status.toLowerCase().includes("success")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {status}
+              </span>
+            </div>
+          )}
+
+          {/* Additional Fields */}
           {Object.keys(rest).length > 0 && (
-            <div className="bg-gray-50 p-2 rounded-md overflow-x-auto text-xs text-gray-600">
-              <pre className="whitespace-pre-wrap">{JSON.stringify(rest, null, 2)}</pre>
+            <div className="mt-3 border-t pt-3 space-y-1 text-gray-700">
+              {Object.entries(rest).map(([key, value]) => (
+                <div key={key}>
+                  <span className="font-medium capitalize">{key}:</span>{" "}
+                  <span className="text-gray-800">
+                    {typeof value === "object"
+                      ? JSON.stringify(value)
+                      : String(value)}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
@@ -122,7 +155,7 @@ export default function LogsPage() {
       ) : logs.length === 0 ? (
         <p className="text-center text-gray-500">No logs available.</p>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {logs.map((log, index) => renderLogCard(log, index))}
         </div>
       )}
