@@ -76,9 +76,6 @@ export default function LogsPage() {
           <CardTitle className="text-lg font-semibold text-gray-800">
             Log #{index + 1}
           </CardTitle>
-          <p className="text-sm text-gray-500">
-            {timestamp ? new Date(timestamp).toLocaleString() : "No timestamp"}
-          </p>
         </CardHeader>
 
         <CardContent className="text-sm space-y-2">
