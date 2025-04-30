@@ -67,6 +67,35 @@ export default function LogsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const renderLogCard = (log, index) => {
+    const { user, action, timestamp, status, ...rest } = log;
+
+    return (
+      <Card key={index} className="shadow-sm border-gray-200">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold text-gray-800">
+            Log #{index + 1}
+          </CardTitle>
+          <p className="text-sm text-gray-500">
+            {timestamp ? new Date(timestamp).toLocaleString() : "No timestamp"}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-gray-700">
+          {user && <p><strong>User:</strong> {user}</p>}
+          {action && <p><strong>Action:</strong> {action}</p>}
+          {status && <p><strong>Status:</strong> {status}</p>}
+
+          {/* Show other fields if any */}
+          {Object.keys(rest).length > 0 && (
+            <div className="bg-gray-50 p-2 rounded-md overflow-x-auto text-xs text-gray-600">
+              <pre className="whitespace-pre-wrap">{JSON.stringify(rest, null, 2)}</pre>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
@@ -93,19 +122,8 @@ export default function LogsPage() {
       ) : logs.length === 0 ? (
         <p className="text-center text-gray-500">No logs available.</p>
       ) : (
-        <div className="space-y-4">
-          {logs.map((log, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>Log #{index + 1}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="whitespace-pre-wrap text-sm">
-                  {JSON.stringify(log, null, 2)}
-                </pre>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid gap-4">
+          {logs.map((log, index) => renderLogCard(log, index))}
         </div>
       )}
     </div>
