@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, Download } from "lucide-react";
 
 export default function LogsPage() {
-  const [rawData, setRawData] = useState(null);
+  const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
@@ -36,7 +36,8 @@ export default function LogsPage() {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
         const data = await res.json();
-        setRawData(data);
+        const logData = Array.isArray(data) ? data : data.logs || [];
+        setLogs(logData);
       } catch (err) {
         toast({
           variant: "destructive",
@@ -53,7 +54,7 @@ export default function LogsPage() {
   }, []);
 
   const handleDownload = () => {
-    const blob = new Blob([JSON.stringify(rawData, null, 2)], {
+    const blob = new Blob([JSON.stringify(logs, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -65,22 +66,6 @@ export default function LogsPage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
-  const renderLogCard = (log, index) => (
-    <Card key={index} className="mb-4 shadow-sm border border-gray-200">
-      <CardHeader>
-        <CardTitle>Log #{index + 1}</CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-gray-700 space-y-1">
-        {Object.entries(log).map(([key, value]) => (
-          <div key={key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <span className="font-medium text-gray-600">{key}:</span>
-            <span className="text-gray-800 break-words sm:ml-2">{String(value)}</span>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="container mx-auto py-8">
@@ -95,7 +80,7 @@ export default function LogsPage() {
         <Button
           onClick={handleDownload}
           className="flex items-center"
-          disabled={!rawData}
+          disabled={!logs.length}
         >
           <Download className="mr-2 h-4 w-4" /> Export Raw Data
         </Button>
@@ -105,15 +90,23 @@ export default function LogsPage() {
         <div className="flex justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      ) : rawData && Array.isArray(rawData) && rawData.length > 0 ? (
-        rawData.map((log, index) => renderLogCard(log, index))
+      ) : logs.length === 0 ? (
+        <p className="text-center text-gray-500">No logs available.</p>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>No Logs Found</CardTitle>
-          </CardHeader>
-          <CardContent className="text-gray-500">There are currently no log records to display.</CardContent>
-        </Card>
+        <div className="space-y-4">
+          {logs.map((log, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle>Log #{index + 1}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="whitespace-pre-wrap text-sm">
+                  {JSON.stringify(log, null, 2)}
+                </pre>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
