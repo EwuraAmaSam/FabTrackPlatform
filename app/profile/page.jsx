@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Loader2, LogOut, X } from "lucide-react";
-import * as jwt_decode from "jwt-decode";
+
 import {
   Card,
   CardHeader,
@@ -76,9 +76,8 @@ export default function ProfilePage() {
     );
   }
 
-  // Handle different property casing that might come from different sources
+  // Handle different property casing
   const userData = {
-    id: user.UserID || user.userId || user.userID,
     name: user.Name || user.name,
     email: user.Email || user.email,
     role: user.Role || user.role,
@@ -88,20 +87,24 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto py-8">
-      <Card className="max-w-md mx-auto">
-        <CardHeader className="bg-gray-100 flex justify-between items-center">
-          <CardTitle className="text-2xl font-bold text-gray-800">Profile</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+      <Card className="max-w-md mx-auto shadow-lg border-0">
+        <CardHeader className="bg-gray-100">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              Profile
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleClose}
+                className="ml-2 text-gray-500 hover:text-gray-700 p-1 h-8 w-8 rounded-full"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </CardTitle>
+          </div>
         </CardHeader>
         
-        <CardContent className="p-6">
+        <CardContent className="p-6 pb-4">
           <div className="space-y-4">
             {userData.name && (
               <div>
@@ -111,21 +114,16 @@ export default function ProfilePage() {
             )}
             
             <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium mt-1">{userData.email}</p>
+              <p className="text-sm text-gray-500 font-semibold">Email</p>
+              <p className="font-medium mt-1 text-gray-800">{userData.email}</p>
             </div>
             
             <div>
-              <p className="text-sm text-gray-500">Role</p>
-              <p className="font-medium mt-1 capitalize">{userData.role?.toLowerCase() || 'user'}</p>
+              <p className="text-sm text-gray-500 font-semibold">Role</p>
+              <p className="font-medium mt-1 capitalize text-gray-800">{userData.role?.toLowerCase() || 'user'}</p>
             </div>
 
-            {userData.id && (
-              <div>
-                <p className="text-sm text-gray-500">User ID</p>
-                <p className="font-medium mt-1">{userData.id}</p>
-              </div>
-            )}
+
             
             {userData.major && (
               <div>
@@ -142,11 +140,11 @@ export default function ProfilePage() {
             )}
           </div>
           
-          <div className="mt-8 pt-4 border-t">
+          <div className="mt-8 pt-4 border-t border-gray-100">
             <Button 
               variant="destructive" 
               onClick={handleLogout}
-              className="w-full"
+              className="w-full shadow-sm hover:shadow-md transition-all"
             >
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>
