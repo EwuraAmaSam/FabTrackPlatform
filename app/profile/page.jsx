@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
@@ -22,17 +21,26 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserData = () => {
       try {
+        // Try to get the full user object from localStorage first
+        const storedUser = localStorage.getItem("userData");
         const token = localStorage.getItem("authToken");
         
         if (!token) {
           throw new Error("No authentication token found");
         }
 
-        const decoded = jwt_decode.jwtDecode(token);
-        setUser({
-          email: decoded.email || decoded.Email,
-          role: decoded.Role || decoded.role,
-        });
+        // Use the stored data
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          // Fallback to decoding from the token
+          const decoded = jwt_decode.jwtDecode(token);
+          setUser({
+            UserID: decoded.UserID || decoded.userId,
+            Email: decoded.Email || decoded.email,
+            Role: decoded.Role || decoded.role,
+          });
+        }
       } catch (error) {
         toast({
           variant: "destructive",
@@ -44,12 +52,13 @@ export default function ProfilePage() {
         setIsLoading(false);
       }
     };
-
+    
     fetchUserData();
-  }, []);
+  }, [router, toast]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
     router.push("/login");
   };
 
@@ -73,11 +82,21 @@ export default function ProfilePage() {
     );
   }
 
+  // Handle different property casing that might come from different sources
+  const userData = {
+    id: user.UserID || user.userId || user.userID,
+    name: user.Name || user.name,
+    email: user.Email || user.email,
+    role: user.Role || user.role,
+    major: user.major,
+    yearGroup: user.yearGroup
+  };
+
   return (
     <div className="container mx-auto py-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">Profile</h1>
+      <Card className="max-w-md mx-auto">
+        <CardHeader className="bg-gray-100 flex justify-between items-center">
+          <CardTitle className="text-2xl font-bold text-gray-800">Profile</CardTitle>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -86,21 +105,49 @@ export default function ProfilePage() {
           >
             <X className="h-5 w-5" />
           </Button>
-        </div>
+        </CardHeader>
         
-        <div className="p-6">
-          <div className="space-y-6">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {userData.name && (
+              <div>
+                <p className="text-sm text-gray-500">Name</p>
+                <p className="font-medium mt-1">{userData.name}</p>
+              </div>
+            )}
+            
             <div>
               <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium mt-1">{user.email}</p>
+              <p className="font-medium mt-1">{userData.email}</p>
             </div>
             
             <div>
               <p className="text-sm text-gray-500">Role</p>
-              <p className="font-medium mt-1 capitalize">{user.role.toLowerCase() || 'user'}</p>
+              <p className="font-medium mt-1 capitalize">{userData.role?.toLowerCase() || 'user'}</p>
             </div>
-          </div>
 
+            {userData.id && (
+              <div>
+                <p className="text-sm text-gray-500">User ID</p>
+                <p className="font-medium mt-1">{userData.id}</p>
+              </div>
+            )}
+            
+            {userData.major && (
+              <div>
+                <p className="text-sm text-gray-500">Major</p>
+                <p className="font-medium mt-1">{userData.major}</p>
+              </div>
+            )}
+            
+            {userData.yearGroup && (
+              <div>
+                <p className="text-sm text-gray-500">Year Group</p>
+                <p className="font-medium mt-1">{userData.yearGroup}</p>
+              </div>
+            )}
+          </div>
+          
           <div className="mt-8 pt-4 border-t">
             <Button 
               variant="destructive" 
@@ -110,8 +157,8 @@ export default function ProfilePage() {
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
