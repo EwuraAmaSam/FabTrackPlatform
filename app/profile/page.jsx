@@ -21,7 +21,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserData = () => {
       try {
-        // Try to get the full user object from localStorage first
+        // Get the user data directly from localStorage
         const storedUser = localStorage.getItem("userData");
         const token = localStorage.getItem("authToken");
         
@@ -29,18 +29,12 @@ export default function ProfilePage() {
           throw new Error("No authentication token found");
         }
 
-        // Use the stored data
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        } else {
-          // Fallback to decoding from the token
-          const decoded = jwt_decode.jwtDecode(token);
-          setUser({
-            UserID: decoded.UserID || decoded.userId,
-            Email: decoded.Email || decoded.email,
-            Role: decoded.Role || decoded.role,
-          });
+        if (!storedUser) {
+          throw new Error("No user data found");
         }
+
+        // Set the user state with the stored data
+        setUser(JSON.parse(storedUser));
       } catch (error) {
         toast({
           variant: "destructive",
