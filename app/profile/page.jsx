@@ -2,116 +2,59 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogOut, X } from "lucide-react";
-import * as jwt_decode from "jwt-decode";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { LogOut } from "lucide-react";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUserData = () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-
-        const decoded = jwt_decode.jwtDecode(token);
-        setUser({
-          email: decoded.email || decoded.Email,
-          role: decoded.Role || decoded.role,
-        });
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to load user data",
-        });
-        router.push("/login");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
+    // Get user data directly from localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      router.push("/login"); // Redirect if no user data
+    }
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem("user");
     localStorage.removeItem("authToken");
     router.push("/login");
   };
 
-  const handleClose = () => {
-    router.back(); // Go back to previous page
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p>No user data available</p>
-      </div>
-    );
-  }
+  if (!user) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">Profile</h1>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+    <div className="max-w-sm mx-auto mt-10 p-6 border rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
+      
+      <div className="space-y-4">
+        <div>
+          <p className="text-gray-500">Name</p>
+          <p className="font-medium">{user.name || "Not provided"}</p>
         </div>
-        
-        <div className="p-6">
-          <div className="space-y-6">
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium mt-1">{user.email}</p>
-            </div>
-            
-            <div>
-              <p className="text-sm text-gray-500">Role</p>
-              <p className="font-medium mt-1 capitalize">{user.role.toLowerCase() || 'user'}</p>
-            </div>
-          </div>
 
-          <div className="mt-8 pt-4 border-t">
-            <Button 
-              variant="destructive" 
-              onClick={handleLogout}
-              className="w-full"
-            >
-              <LogOut className="mr-2 h-4 w-4" /> Logout
-            </Button>
-          </div>
+        <div>
+          <p className="text-gray-500">Email</p>
+          <p className="font-medium">{user.email}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-500">Role</p>
+          <p className="font-medium capitalize">{user.role?.toLowerCase()}</p>
         </div>
       </div>
+
+      <Button 
+        onClick={handleLogout}
+        className="w-full mt-8"
+        variant="destructive"
+      >
+        <LogOut className="mr-2" /> Logout
+      </Button>
     </div>
   );
 }
