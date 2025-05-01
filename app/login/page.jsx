@@ -59,8 +59,15 @@ export default function LoginPage() {
         throw new Error(data.message || "Login failed");
       }
 
+      // Store token in local storage
       localStorage.setItem("authToken", data.token);
-      const decoded = jwt_decode.jwtDecode(data.token);  // Updated usage
+      
+      // Store the complete user object in local storage
+      if (data.user) {
+        localStorage.setItem("userData", JSON.stringify(data.user));
+      }
+      
+      const decoded = jwt_decode.jwtDecode(data.token);
       const role = decoded.Role;
 
       if (login) {
@@ -127,12 +134,6 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-{/*                 <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link> */}
               </div>
               <Input
                 id="password"
